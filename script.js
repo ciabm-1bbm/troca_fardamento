@@ -273,28 +273,36 @@ tradeForm.addEventListener('submit', async function(e) {
     }
 });
 
-// --- FUNÇÕES AUXILIARES ---
+// --- FUNÇÃO DE CARREGAMENTO (ATUALIZADA) ---
 async function carregarLista() {
+    tradeList.innerHTML = '<tr><td colspan="6">Buscando dados na planilha...</td></tr>';
+    
     try {
-        const res = await fetch(API_URL);
+        // TRUQUE ANTI-CACHE: Adicionamos um número aleatório (?t=...) no final do link
+        // Isso obriga o navegador a buscar os dados novos SEMPRE.
+        const cacheBuster = new Date().getTime(); 
+        const res = await fetch(API_URL + "?action=read&t=" + cacheBuster);
+        
         const json = await res.json();
         
         tradeList.innerHTML = '';
         
         if (json.data && json.data.length > 0) {
+            let trocasAtivas = 0;
+
             json.data.forEach(item => {
-                if(item.status !== 'Concluída') { // Só mostra ativas
-                    const date = new Date(item.data).toLocaleDateString('pt-BR');
+                // Filtra para mostrar apenas status diferente de 'Concluída'
+                if(item.status !== 'Concluída') { 
+                    trocasAtivas++;
                     
-                    // Cria link do WhatsApp Limpo
-                    let zapLimpo = item.whatsapp.replace(/\D/g, ''); // Remove traços e parenteses
+                    // Tratamento do WhatsApp
+                    let zapLimpo = String(item.whatsapp).replace(/\D/g, ''); 
                     if(!zapLimpo.startsWith('55')) zapLimpo = '55' + zapLimpo;
                     const linkZap = `https://wa.me/${zapLimpo}?text=Olá ${item.nomeGuerra}, vi seu anúncio de troca de ${item.item}.`;
 
                     const row = `
                         <tr>
-                            <td>${date}</td>
-                            <td>${item.nomeGuerra} <br><small>${item.secao}</small></td>
+                            <td>${item.data}</td> <td><strong>${item.nomeGuerra}</strong><br><small>${item.secao}</small></td>
                             <td>${item.item}</td>
                             <td>${item.tenho}</td>
                             <td>${item.preciso}</td>
@@ -308,14 +316,21 @@ async function carregarLista() {
                     tradeList.innerHTML += row;
                 }
             });
+
+            if (trocasAtivas === 0) {
+                tradeList.innerHTML = '<tr><td colspan="6">Não há trocas ativas no momento.</td></tr>';
+            }
+
         } else {
-            tradeList.innerHTML = '<tr><td colspan="6">Nenhuma troca disponível no momento.</td></tr>';
+            tradeList.innerHTML = '<tr><td colspan="6">Nenhum registro encontrado na planilha.</td></tr>';
         }
     } catch (err) {
-        tradeList.innerHTML = '<tr><td colspan="6">Erro ao carregar lista.</td></tr>';
+        console.error(err);
+        tradeList.innerHTML = '<tr><td colspan="6">Erro ao carregar lista. Tente atualizar a página.</td></tr>';
     }
 }
 
 // Iniciar
 
 carregarLista();
+
