@@ -275,42 +275,46 @@ tradeForm.addEventListener('submit', async function(e) {
 
 // --- FUNÇÃO DE CARREGAMENTO (ATUALIZADA) ---
 async function carregarLista() {
-    tradeList.innerHTML = '<tr><td colspan="6">Buscando dados na planilha...</td></tr>';
+    tradeList.innerHTML = '<tr><td colspan="6">🔍 Buscando dados na planilha...</td></tr>';
     
     try {
-        // TRUQUE ANTI-CACHE: Adicionamos um número aleatório (?t=...) no final do link
-        // Isso obriga o navegador a buscar os dados novos SEMPRE.
         const cacheBuster = new Date().getTime(); 
+        // Faz a conexão
         const res = await fetch(API_URL + "?action=read&t=" + cacheBuster);
         
+        // --- DIAGNÓSTICO DE ERRO ---
+        if (!res.ok) {
+            throw new Error(`Erro de Rede: ${res.status} ${res.statusText}`);
+        }
+        // ---------------------------
+
         const json = await res.json();
         
+        // Verifica se o Google retornou erro interno
+        if (json.status === 'error') {
+            throw new Error(`Erro do Script: ${json.message}`);
+        }
+
         tradeList.innerHTML = '';
         
         if (json.data && json.data.length > 0) {
             let trocasAtivas = 0;
 
             json.data.forEach(item => {
-                // Filtra para mostrar apenas status diferente de 'Concluída'
                 if(item.status !== 'Concluída') { 
                     trocasAtivas++;
-                    
-                    // Tratamento do WhatsApp
                     let zapLimpo = String(item.whatsapp).replace(/\D/g, ''); 
                     if(!zapLimpo.startsWith('55')) zapLimpo = '55' + zapLimpo;
                     const linkZap = `https://wa.me/${zapLimpo}?text=Olá ${item.nomeGuerra}, vi seu anúncio de troca de ${item.item}.`;
 
                     const row = `
                         <tr>
-                            <td>${item.data}</td> <td><strong>${item.nomeGuerra}</strong><br><small>${item.secao}</small></td>
+                            <td>${item.data}</td>
+                            <td><strong>${item.nomeGuerra}</strong><br><small>${item.secao}</small></td>
                             <td>${item.item}</td>
                             <td>${item.tenho}</td>
                             <td>${item.preciso}</td>
-                            <td>
-                                <a href="${linkZap}" target="_blank" class="whatsapp-btn">
-                                   Chamar no Zap
-                                </a>
-                            </td>
+                            <td><a href="${linkZap}" target="_blank" class="whatsapp-btn">Chamar no Zap</a></td>
                         </tr>
                     `;
                     tradeList.innerHTML += row;
@@ -326,11 +330,13 @@ async function carregarLista() {
         }
     } catch (err) {
         console.error(err);
-        tradeList.innerHTML = '<tr><td colspan="6">Erro ao carregar lista. Tente atualizar a página.</td></tr>';
+        // AGORA VAI MOSTRAR O ERRO REAL NA TELA
+        tradeList.innerHTML = `<tr><td colspan="6" style="color:red; font-weight:bold;">ERRO DETALHADO: ${err.message}</td></tr>`;
     }
 }
 
 // Iniciar
 
 carregarLista();
+
 
