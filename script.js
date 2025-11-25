@@ -317,4 +317,5 @@ async function carregarLista() {
 }
 
 // Iniciar
+
 carregarLista();
