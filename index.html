@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troca de Fardamento - 1ª Cia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header id="main-header">
+        <div class="container">
+            <h1>Troca de Fardamento</h1>
+            <h2>1ª Companhia de Bombeiros Militar</h2>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card">
+            <h2>1. Identificação</h2>
+            <input type="text" id="idInput" placeholder="Digite sua ID Funcional">
+            <div id="userInfo" class="hidden">
+                <p><strong>Militar:</strong> <span id="userGraduacao"></span> <span id="userNome"></span></p>
+                <p><strong>Seção:</strong> <span id="userSecao"></span></p>
+            </div>
+        </div>
+
+        <div id="tradeSection" class="card hidden">
+            <h2>2. Dados da Troca</h2>
+            <form id="tradeForm">
+                <label>Item:</label>
+                <select id="itemSelect" required>
+                    <option value="" disabled selected>-- Selecione --</option>
+                    <option value="Camiseta">Camiseta</option>
+                    <option value="Gandola">Gandola</option>
+                    <option value="Calça Farda">Calça Farda</option>
+                    <option value="Cobertura">Cobertura</option>
+                    <option value="Parká">Parká</option>
+                </select>
+
+                <div class="row">
+                    <div class="col">
+                        <label>Tenho (Tamanho):</label>
+                        <select id="tamanhoTenho" required disabled></select>
+                    </div>
+                    <div class="col">
+                        <label>Preciso (Tamanho):</label>
+                        <select id="tamanhoPreciso" required disabled></select>
+                    </div>
+                </div>
+
+                <label>WhatsApp (com DDD):</label>
+                <input type="text" id="whatsappInput" placeholder="(51) 99999-9999" required>
+
+                <button type="submit" class="button">Registrar Troca</button>
+            </form>
+            <div id="statusMessage"></div>
+        </div>
+
+        <div class="card">
+            <h2>Disponíveis para Troca</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Militar</th>
+                            <th>Item</th>
+                            <th>Tem</th>
+                            <th>Precisa</th>
+                            <th>Contato</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradeList">
+                        <tr><td colspan="6">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

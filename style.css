@@ -1,0 +1,26 @@
+:root { --primary: #B22222; --dark: #333; --light: #f4f4f4; } /* Vermelho Bombeiro */
+body { font-family: 'Open Sans', sans-serif; background: var(--light); margin: 0; padding: 0; }
+.container { max-width: 800px; margin: auto; padding: 20px; }
+
+#main-header { background: var(--primary); color: white; text-align: center; padding: 20px; border-bottom: 4px solid #800000; }
+h1, h2 { font-family: 'Oswald', sans-serif; margin: 5px 0; }
+h1 { text-transform: uppercase; }
+
+.card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.hidden { display: none; }
+
+input, select { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+.row { display: flex; gap: 10px; }
+.col { flex: 1; }
+
+.button { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+.button:hover { background: #555; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+th { background: #eee; font-family: 'Oswald', sans-serif; }
+.whatsapp-btn { background-color: #25D366; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; font-size: 12px;}
+.whatsapp-btn:hover { background-color: #128C7E; }
+
+/* Mobile */
+@media (max-width: 600px) { .table-container { overflow-x: auto; } }
