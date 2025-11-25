@@ -305,7 +305,7 @@ async function carregarLista() {
                     trocasAtivas++;
                     let zapLimpo = String(item.whatsapp).replace(/\D/g, ''); 
                     if(!zapLimpo.startsWith('55')) zapLimpo = '55' + zapLimpo;
-                    const linkZap = `https://wa.me/${zapLimpo}?text=Olá ${item.nomeGuerra}, vi seu anúncio de troca de ${item.item}.`;
+                    const linkZap = `https://wa.me/${zapLimpo}?text=Olá ${item.nomeGuerra}, vi seu registro na Plataforma de Troca de Fardamento, com interesse em trocar ${item.item}.`;
 
                     const row = `
                         <tr>
@@ -314,7 +314,7 @@ async function carregarLista() {
                             <td>${item.item}</td>
                             <td>${item.tenho}</td>
                             <td>${item.preciso}</td>
-                            <td><a href="${linkZap}" target="_blank" class="whatsapp-btn">Chamar no Zap</a></td>
+                            <td><a href="${linkZap}" target="_blank" class="whatsapp-btn">Contato via Whatsapp</a></td>
                         </tr>
                     `;
                     tradeList.innerHTML += row;
@@ -338,6 +338,7 @@ async function carregarLista() {
 // Iniciar
 
 carregarLista();
+
 
 
 
