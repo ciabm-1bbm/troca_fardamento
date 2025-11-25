@@ -273,27 +273,17 @@ tradeForm.addEventListener('submit', async function(e) {
     }
 });
 
-// --- FUNÇÃO DE CARREGAMENTO (ATUALIZADA) ---
+// --- SUBSTITUA A FUNÇÃO carregarLista POR ESTA ---
 async function carregarLista() {
-    tradeList.innerHTML = '<tr><td colspan="6">🔍 Buscando dados na planilha...</td></tr>';
+    tradeList.innerHTML = '<tr><td colspan="7" style="text-align:center;">⏳ Atualizando lista...</td></tr>';
     
     try {
         const cacheBuster = new Date().getTime(); 
-        // Faz a conexão
         const res = await fetch(API_URL + "?action=read&t=" + cacheBuster);
-        
-        // --- DIAGNÓSTICO DE ERRO ---
-        if (!res.ok) {
-            throw new Error(`Erro de Rede: ${res.status} ${res.statusText}`);
-        }
-        // ---------------------------
+        const textData = await res.text(); 
+        const json = JSON.parse(textData);
 
-        const json = await res.json();
-        
-        // Verifica se o Google retornou erro interno
-        if (json.status === 'error') {
-            throw new Error(`Erro do Script: ${json.message}`);
-        }
+        if (json.status === 'error') throw new Error(json.message);
 
         tradeList.innerHTML = '';
         
@@ -301,11 +291,12 @@ async function carregarLista() {
             let trocasAtivas = 0;
 
             json.data.forEach(item => {
+                // Só mostra se NÃO estiver concluída
                 if(item.status !== 'Concluída') { 
                     trocasAtivas++;
                     let zapLimpo = String(item.whatsapp).replace(/\D/g, ''); 
                     if(!zapLimpo.startsWith('55')) zapLimpo = '55' + zapLimpo;
-                    const linkZap = `https://wa.me/${zapLimpo}?text=Olá ${item.nomeGuerra}, vi seu registro na Plataforma de Troca de Fardamento, com interesse em trocar ${item.item}.`;
+                    const linkZap = `https://wa.me/${zapLimpo}?text=Olá ${item.nomeGuerra}, vi seu anúncio de troca de ${item.item}.`;
 
                     const row = `
                         <tr>
@@ -314,7 +305,16 @@ async function carregarLista() {
                             <td>${item.item}</td>
                             <td>${item.tenho}</td>
                             <td>${item.preciso}</td>
-                            <td><a href="${linkZap}" target="_blank" class="whatsapp-btn">Contato via Whatsapp</a></td>
+                            <td>
+                                <div class="col-acoes">
+                                    <a href="${linkZap}" target="_blank" class="whatsapp-btn">Zap</a>
+                                </div>
+                            </td>
+                            <td style="text-align:center;">
+                                <button class="btn-concluir" onclick="concluirTroca(${item.linha})">
+                                    ✖ Já Troquei
+                                </button>
+                            </td>
                         </tr>
                     `;
                     tradeList.innerHTML += row;
@@ -322,19 +322,62 @@ async function carregarLista() {
             });
 
             if (trocasAtivas === 0) {
-                tradeList.innerHTML = '<tr><td colspan="6">Não há trocas ativas no momento.</td></tr>';
+                tradeList.innerHTML = '<tr><td colspan="7" style="text-align:center;">Nenhuma troca ativa no momento.</td></tr>';
             }
 
         } else {
-            tradeList.innerHTML = '<tr><td colspan="6">Nenhum registro encontrado na planilha.</td></tr>';
+            tradeList.innerHTML = '<tr><td colspan="7" style="text-align:center;">Lista vazia.</td></tr>';
         }
     } catch (err) {
         console.error(err);
-        // AGORA VAI MOSTRAR O ERRO REAL NA TELA
-        tradeList.innerHTML = `<tr><td colspan="6" style="color:red; font-weight:bold;">ERRO DETALHADO: ${err.message}</td></tr>`;
+        tradeList.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Erro ao carregar.</td></tr>`;
     }
 }
 
+// --- NOVA FUNÇÃO: CONCLUIR TROCA ---
+// Adicione esta função no final do seu arquivo script.js
+async function concluirTroca(linha) {
+    // 1. Pergunta a ID para segurança
+    const idConfirmacao = prompt("Para confirmar que você já realizou essa troca, digite sua ID FUNCIONAL:");
+    
+    if (!idConfirmacao) return; // Se cancelar, para aqui
+
+    // Mostra um aviso visual
+    const statusMessage = document.getElementById('statusMessage'); // Usa a div de mensagem lá de cima
+    if(statusMessage) {
+        statusMessage.innerText = "Verificando ID e atualizando...";
+        statusMessage.style.color = "blue";
+    }
+
+    try {
+        // 2. Envia para o Google Script
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            mode: 'cors',
+            body: JSON.stringify({
+                action: "concluir", // Diz pro Google que é uma atualização
+                linha: linha,
+                idConfirmacao: idConfirmacao
+            })
+        });
+
+        const textResp = await response.text(); // Pega texto primeiro pra evitar erro
+        const jsonResp = JSON.parse(textResp);
+
+        if (jsonResp.status === 'success') {
+            alert("Sucesso! O item foi marcado como trocado e saiu da lista.");
+            carregarLista(); // Atualiza a tabela
+            if(statusMessage) statusMessage.innerText = "";
+        } else {
+            alert("Erro: " + jsonResp.message); // Ex: ID Incorreta
+            if(statusMessage) statusMessage.innerText = "";
+        }
+
+    } catch (err) {
+        alert("Erro de conexão ao tentar concluir.");
+        console.error(err);
+    }
+}
 // Iniciar
 
 carregarLista();
